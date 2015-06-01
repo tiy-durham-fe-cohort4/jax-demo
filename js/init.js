@@ -1,78 +1,53 @@
 $(function () {
-	
-	// "556c7be28fed340300000003"
-	
-//	deleteOne('556c7baf8fed340300000001').done(function () {
-//		getAllOrders();
-//	});
+  // Create an instance of our RestService object
+	var service = new RestService('http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas/');
+  
+  // Add a fail handler for all AJAX calls on service
+  service.fail(function (req, status, err) {
+    if (!err || !err.message) {
+      err = { message: 'Ruh roh!' };
+    }
+    
+    $('.error-message').remove();
+    $('.main-content').prepend(views('error-message', err));
+    
+    console.log('ERROR ', arguments);
+  });
+  
+  // Load all of our current orders
+  service.getAll().done(function (orders) {
+    $('.main-content').html(views('orders-list', { orders: orders }));
+  });
+  
+  // When our order form is submitted, call the API to add the order,
+  // then redraw when the order is saved.
+  $('.main-content').on('submit', '.order-form', function (e) {
+    e.preventDefault();
+    
+    service.add(formToObject(this)).done(function (createdOrder) {
+      $('.order-list').append(views('order', createdOrder));
+    });
+  });
+  
+  // When an order is removed, remove it from the API, then from
+  // the DOM...
+  $('.main-content').on('click', '.remove-order', function () {
+    var orderElement = $(this).closest('.order');
+    
+    service.remove($(this).data('id')).done(function () {
+      orderElement.remove();
+    });
+  });
 
-//	updateOne('556c7be28fed340300000003', {
-//		address: "Durham, NC",
-//		customer: "John Dough",
-//		order: "Large veggie"	
-//	});
-	
-	getAllOrders();
-	
-	function updateOne(id, pizzaOrder) {
-		return $.ajax({
-			url: 'http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas/' + id,
-			method: 'PUT',
-			data: JSON.stringify(pizzaOrder),
-			contentType: 'application/json'
-		}).done(function (data) {
-			console.log(data);
-		});
-	}
-	
-	// Deletes a single object by id
-	function deleteOne(id) {
-		return $.ajax({
-			url: 'http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas/' + id,
-			method: 'DELETE'
-		}).done(function (data) {
-			console.log(data);
-		});
-	}
-	
-	function getOne(id) {
-		$.ajax({
-			url: 'http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas/' + id,
-			method: 'GET'
-		}).done(function (data) {
-			console.log(data);
-		});		
-	}
-	
-	function getAllOrders() {
-		$.ajax({
-			url: 'http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas',
-			method: 'GET'
-		}).done(function (data) {
-			console.log(data);
-		});
-	}
-	
-	$('.create-order').on('submit', function (e) {
-		e.preventDefault();
-		var pizzaOrder = {
-			customer: 'John Dough',
-			address: 'Raleigh, NC',
-			order: 'Large veggie'	
-		};
-		
-		$.ajax({
-			url: 'http://tiny-pizza-server.herokuapp.com/collections/cdavies-pizzas',
-			method: 'POST',
-			data: JSON.stringify(pizzaOrder),
-			contentType: 'application/json'
-		}).done(function (data) {
-			console.log(data);
-		}).fail(function () {
-			console.log('RUH ROH', arguments);
-		});	
-	});
-	
-	// http://tiny-pizza-server.herokuapp.com/collections/cdavies-durham
-	
+  // A convenience function to turn a form into an object
+  function formToObject(form) {
+    var obj = {};
+    
+    // Turn our form into a hash/object representing the user's input
+    $(form).find('input').each(function (i, input) {
+      obj[input.name] = input.value;
+    });
+    
+    return obj;
+  }  
 });

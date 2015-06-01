@@ -5,10 +5,43 @@
     <title>Title</title>
   </head>
   <body>
-	  <h1>Hey. Here's a pizza app.</h1>
-	  http://tiny-pizza-server.herokuapp.com/collections/cdavies-durham
+	  
+    <main class="main-content">
+      
+    </main>
+    
+    <script id="orders-list" type="text/html">
+      <form class="order-form">
+        <input type="text" name="customer" placeholder="customer" />
+        <input type="text" name="address" placeholder="address" />
+        <input type="text" name="order" placeholder="order" />
+        <button>Place Order</button>
+      </form>
+      
+      <ul class="order-list">
+        <% m.orders.forEach(function (order) { %>
+          <%= views('order', order) %>
+        <% }) %>
+      </ul>
+    </script>
+    
+    <script id="order" type="text/html">
+      <li class="order">
+        <h2 class="order-customer"><%- m.customer %></h2>
+        <span class="order-address"><%- m.address %></span>
+        <span class="order-description"><%- m.order %></span>
+        <button class="remove-order" data-id="<%- m._id %>">X</button>
+      </li>
+    </script>
+    
+    <script id="error-message" type="text/html">
+      <div class="error-message"><%- m.message %></div>
+    </script>
     
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="js/rest-service.js"></script>
+    <script src="js/views.js"></script>
     <script src="js/init.js"></script>
     
   </body>
